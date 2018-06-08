@@ -1,0 +1,72 @@
+apply plugin: 'com.android.application'
+
+android {
+    /*defaultConfig {
+        multiDexEnabled true
+    }*/
+
+    signingConfigs {
+        key0config {
+            keyAlias 'key0'
+            keyPassword 'asdfgh'
+            storeFile file('D:/androidres/appsigner/appsignerfile.jks')
+            storePassword 'asdfgh'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/jersey-module-version'
+    }
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.example.hzy.lovenum"
+        minSdkVersion 18
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.key0config
+        }
+        debug {
+            signingConfig signingConfigs.key0config
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:support-vector-drawable:26.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation files('libs/jerseylib/jersey-client-1.19.1.jar')
+    implementation files('libs/jerseylib/jersey-core-1.19.1.jar')
+    implementation files('libs/jerseylib/jersey-json-1.19.1.jar')
+    implementation files('libs/jerseylib/jersey-server-1.19.1.jar')
+    implementation files('libs/jerseylib/jersey-servlet-1.19.1.jar')
+    implementation files('libs/jerseylib/jersey-spring-1.19.1.jar')
+    implementation files('libs/jerseylib/jsr311-api-1.1.1.jar')
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation files('libs/gaodemap/Android_Map3D_SDK_V6.0.0_20180211.jar')
+    implementation files('libs/gaodemap/AMap_Location_V3.8.0_20180201.jar')
+    implementation files('libs/gaodemap/AMap_Search_V5.7.0_20171229.jar')
+    //这个包重复引用了
+//    implementation files('libs/gaodemap/android-support-v4.jar')
+    implementation files('libs/gaodemap/Volley.jar')
+    //日志处理
+    implementation 'com.orhanobut:logger:2.2.0'
+}
