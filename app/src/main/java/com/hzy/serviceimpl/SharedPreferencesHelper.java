@@ -10,12 +10,17 @@ import android.util.Log;
 
 public  class SharedPreferencesHelper  {
     private static final String SHARED_PATH = "com.example.hzy.lovenum.SharedPreferencesone";
-    private static SharedPreferencesHelper instance;
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
     // 引导界面KEY
     private static final String KEY_GUIDE_ACTIVITY = "guide_activity";
     private static final String GUIDE_PATH = "guide_shared";
+    private static SharedPreferencesHelper instance;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
+
+    private SharedPreferencesHelper(Context context) {
+        sp = context.getSharedPreferences(SHARED_PATH, Context.MODE_PRIVATE);
+        editor = sp.edit();
+    }
 
     public static SharedPreferencesHelper getInstance(Context context) {
         if (instance == null && context != null) {
@@ -24,9 +29,44 @@ public  class SharedPreferencesHelper  {
         return instance;
     }
 
-    private SharedPreferencesHelper(Context context) {
-        sp = context.getSharedPreferences(SHARED_PATH, Context.MODE_PRIVATE);
-        editor = sp.edit();
+    /**
+     * 判断activity是否引导�?	 *
+     *
+     * @param context
+     * @return 是否已经引导�?true引导过了 false未引�?
+     */
+    public static boolean activityIsGuided(Context context, String className) {
+        if (context == null || className == null
+                || "".equalsIgnoreCase(className))
+            return false;
+        String[] classNames = context
+                .getSharedPreferences(GUIDE_PATH, Context.MODE_WORLD_READABLE)
+                .getString(KEY_GUIDE_ACTIVITY, "").split("\\|");// 取得�?��类名 �?
+        // com.my.MainFrameActivity
+        for (String string : classNames) {
+            if (className.equalsIgnoreCase(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 设置该activity被引导过了�? 将类名已 |a|b|c这种形式保存为value，因为偏好中只能保存键�?�?	 *
+     *
+     * @param context
+     * @param className
+     */
+    public static void setIsGuided(Context context, String className) {
+        if (context == null || className == null
+                || "".equalsIgnoreCase(className))
+            return;
+        String classNames = context.getSharedPreferences(GUIDE_PATH,
+                Context.MODE_WORLD_READABLE).getString(KEY_GUIDE_ACTIVITY, "");
+        StringBuilder sb = new StringBuilder(classNames).append("|").append(
+                className);// 添加�?		context.getSharedPreferences(GUIDE_PATH, Context
+        // .MODE_WORLD_READABLE)// 保存修改后的�?				.edit().putString(KEY_GUIDE_ACTIVITY, sb
+        // .toString()).commit();
     }
 
     public long getLongValue(String key) {
@@ -38,7 +78,7 @@ public  class SharedPreferencesHelper  {
 
     public String getStringValue(String key) {
         if (key != null && !key.equals("")) {
-            return sp.getString(key, null);
+            return sp.getString(key, "");
         }
         return null;
     }
@@ -70,6 +110,7 @@ public  class SharedPreferencesHelper  {
         }
         return 0;
     }
+
     public double getDoubleValue(String key) {
         if (key != null && !key.equals("")) {
             return Double.longBitsToDouble(sp.getLong(key, Double.doubleToLongBits(0)));
@@ -109,6 +150,7 @@ public  class SharedPreferencesHelper  {
             editor.commit();
         }
     }
+
     public void putDoubbleValue(String key, double value) {
         if (key != null && !key.equals("")) {
             editor = sp.edit();
@@ -139,43 +181,6 @@ public  class SharedPreferencesHelper  {
                 - sp.getLong(tag, System.currentTimeMillis());
         putLongValue(tag, System.currentTimeMillis());
         return durtion;
-    }
-
-    /**
-     * 判断activity是否引导�?	 *
-     *
-     * @param context
-     * @return 是否已经引导�?true引导过了 false未引�?
-     */
-    public static boolean activityIsGuided(Context context, String className) {
-        if (context == null || className == null
-                || "".equalsIgnoreCase(className))
-            return false;
-        String[] classNames = context
-                .getSharedPreferences(GUIDE_PATH, Context.MODE_WORLD_READABLE)
-                .getString(KEY_GUIDE_ACTIVITY, "").split("\\|");// 取得�?��类名 �?																// com.my.MainFrameActivity
-        for (String string : classNames) {
-            if (className.equalsIgnoreCase(string)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 设置该activity被引导过了�? 将类名已 |a|b|c这种形式保存为value，因为偏好中只能保存键�?�?	 *
-     *
-     * @param context
-     * @param className
-     */
-    public static void setIsGuided(Context context, String className) {
-        if (context == null || className == null
-                || "".equalsIgnoreCase(className))
-            return;
-        String classNames = context.getSharedPreferences(GUIDE_PATH,
-                Context.MODE_WORLD_READABLE).getString(KEY_GUIDE_ACTIVITY, "");
-        StringBuilder sb = new StringBuilder(classNames).append("|").append(
-                className);// 添加�?		context.getSharedPreferences(GUIDE_PATH, Context.MODE_WORLD_READABLE)// 保存修改后的�?				.edit().putString(KEY_GUIDE_ACTIVITY, sb.toString()).commit();
     }
 
     /**

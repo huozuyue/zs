@@ -287,4 +287,10 @@
     <string name="title_activity_sendinfo">发件人信息</string>
     <string name="title_activity_twolocation">twolocationActivity</string>
     <string name="title_activity_receiveinfo">收件人信息</string>
+    <string name="title_activity_main2">Main2Activity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

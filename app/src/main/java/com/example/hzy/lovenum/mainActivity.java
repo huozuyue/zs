@@ -70,19 +70,11 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 		AMapLocationListener, AMap.OnMapTouchListener, View.OnClickListener, TextWatcher,
         Inputtips.InputtipsListener, AMap.OnMarkerClickListener, AMap.InfoWindowAdapter,
         RouteSearch.OnRouteSearchListener,OnMapClickListener,OnInfoWindowClickListener {
-	private AMap aMap;
-	private MapView mapView;
-	private OnLocationChangedListener mListener;
-	private AMapLocationClient mlocationClient;
-	private AMapLocationClientOption mLocationOption;
-    private TextView searchText;// 输入搜索关键字
-    private TextView editCity;// 要输入的城市名字或者城市区号
+    private final int ROUTE_TYPE_DRIVE = 2;
     Button searButton;
 	boolean useMoveToLocationWithMapMode = true;
-	private String locationaddress;
 	//自定义定位小蓝点的Marker
 	Marker locationMarker;
-
 	//坐标和经纬度转换工具
 	Projection projection;
     String strContentString="";
@@ -92,11 +84,23 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
     double sendlon=0.0;
     double receivelat=0.0;
     double receivelon=0.0;
+    MyCancelCallback myCancelCallback = new MyCancelCallback();
+    private AMap aMap;
+    private MapView mapView;
+    private OnLocationChangedListener mListener;
+    private AMapLocationClient mlocationClient;
+    private AMapLocationClientOption mLocationOption;
+    private TextView searchText;// 输入搜索关键字
+    private TextView editCity;// 要输入的城市名字或者城市区号
+    private String locationaddress;
     private RouteSearch mRouteSearch;
-    private final int ROUTE_TYPE_DRIVE = 2;
     private DriveRouteResult mDriveRouteResult;
     private RelativeLayout mBottomLayout, mHeadLayout;
     private TextView mRotueTimeDes, mRouteDetailDes;
+    private LatLonPoint mStartPoint = new LatLonPoint(39.942295, 116.335891);//起点，39.942295,
+    // 116.335891
+    private LatLonPoint mEndPoint = new LatLonPoint(39.995576, 116.481288);//终点，39.995576,116.481288
+    private ProgressDialog progDialog = null;// 搜索时进度条
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +145,6 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         }
 	}
 
-
 	/**
 	 * 初始化
 	 */
@@ -149,10 +152,13 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 		if (aMap == null) {
 			aMap = mapView.getMap();
 			setUpMap();
-            if(!"".equals(strContentString)){
-                SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue("sendlocation",strContentString);}
-             if(!"".equals(receivelocation)){SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue("receivelocation",receivelocation);}
-		}
+            if (!"".equals(strContentString) && null != strContentString) {
+                SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue
+                        ("sendlocation",strContentString);}
+            if (!"".equals(receivelocation) && null != receivelocation) {
+                SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue("receivelocation", receivelocation);
+            }
+        }
         registerListener();
         mRouteSearch = new RouteSearch(this);
         mRouteSearch.setRouteSearchListener(this);
@@ -161,6 +167,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         mRouteDetailDes = (TextView) findViewById(R.id.secondline);
 
 	}
+
     /**
      * 注册监听
      */
@@ -170,6 +177,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         aMap.setOnInfoWindowClickListener(this);
         aMap.setInfoWindowAdapter(this);
     }
+
         /**
          * 存储数据
          */
@@ -187,6 +195,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         //System.out.println("sharedPreferencesString："+ sharedPreferencesString);
         Logger.d("sendlocation"+sharedPreferencesString);
     }
+
     /**
      * 查询数据
      */
@@ -199,6 +208,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         System.out.println("sharedPreferencesString："+ sharedPreferencesString);
         return sharedPreferencesString;
     }
+
 	/**
 	 * 删除数据
 	 */
@@ -209,6 +219,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 
 
 	}
+
 	/**
 	 * 设置一些amap的属性
 	 */
@@ -237,7 +248,6 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         aMap.setOnMarkerClickListener(this);// 添加点击marker监听事件
         aMap.setInfoWindowAdapter(this);// 添加显示infowindow监听事件
 	}
-
 
 	/**
 	 * 方法必须重写
@@ -282,7 +292,8 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 			mlocationClient.onDestroy();
 		}
         SharedPreferencesHelper.getInstance(mainActivity.this).removeStringValue("sendlocation");
-	}
+        finish();
+    }
 
 	/**
 	 * 定位成功后回调函数
@@ -302,9 +313,9 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 
 
                 if ("".equals(locationaddress) && "".equals(strContentString)) {
+                    editCity.setText("无法获取定位位置");
                     ToastUtil.show(this, "无法获取定位位置");
-                    return;}
-                else if("".equals(strContentString) ){
+                    return;} else if ("".equals(strContentString) || null == strContentString) {
                     editCity.setText(amapLocation.getAddress());
                     //SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue("sendlocation",strContentString);
                     SharedPreferencesHelper.getInstance(mainActivity.this).putDoubbleValue("sendlat", amapLocation.getLatitude());
@@ -336,8 +347,8 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 					} else {
 						startChangeLocation(latLng);
 					}
-					
-				}
+
+                }
 
 
 			} else {
@@ -353,7 +364,6 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
             }
         }
 	}
-
 
 	/**
 	 * 修改自定义定位小蓝点的位置
@@ -394,17 +404,11 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 
 	}
 
-
-	MyCancelCallback myCancelCallback = new MyCancelCallback();
-
 	@Override
 	public void onTouch(MotionEvent motionEvent) {
 		Log.i("amap","onTouch 关闭地图和小蓝点一起移动的模式");
 		useMoveToLocationWithMapMode = false;
 	}
-
-    private LatLonPoint mStartPoint = new LatLonPoint(39.942295,116.335891);//起点，39.942295,116.335891
-    private LatLonPoint mEndPoint = new LatLonPoint(39.995576,116.481288);//终点，39.995576,116.481288
 
     /**
      * Button点击事件回调方法
@@ -587,7 +591,6 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 
     }
 
-    private ProgressDialog progDialog = null;// 搜索时进度条
     /**
      * 显示进度框
      */
@@ -684,34 +687,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
     }
 
     /**
-	 * 监控地图动画移动情况，如果结束或者被打断，都需要执行响应的操作
-	 */
-	 class MyCancelCallback implements AMap.CancelableCallback {
-
-		LatLng targetLatlng;
-		public void setTargetLatlng(LatLng latlng) {
-			this.targetLatlng = latlng;
-		}
-
-		@Override
-		public void onFinish() {
-			if(locationMarker != null && targetLatlng != null) {
-				locationMarker.setPosition(targetLatlng);
-			}
-		}
-
-		@Override
-		public void onCancel() {
-			if(locationMarker != null && targetLatlng != null) {
-				locationMarker.setPosition(targetLatlng);
-			}
-		}
-	};
-
-
-
-	/**
-	 * 激活定位
+     * 激活定位
 	 */
 	@Override
 	public void activate(OnLocationChangedListener listener) {
@@ -733,7 +709,9 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 			// 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
 			mlocationClient.startLocation();
 		}
-	}
+    }
+
+    ;
 
 	/**
 	 * 停止定位
@@ -747,6 +725,32 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 		}
 		mlocationClient = null;
 	}
+
+    /**
+     * 监控地图动画移动情况，如果结束或者被打断，都需要执行响应的操作
+     */
+    class MyCancelCallback implements AMap.CancelableCallback {
+
+        LatLng targetLatlng;
+
+        public void setTargetLatlng(LatLng latlng) {
+            this.targetLatlng = latlng;
+        }
+
+        @Override
+        public void onFinish() {
+            if (locationMarker != null && targetLatlng != null) {
+                locationMarker.setPosition(targetLatlng);
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            if (locationMarker != null && targetLatlng != null) {
+                locationMarker.setPosition(targetLatlng);
+            }
+        }
+    }
 
 
 }

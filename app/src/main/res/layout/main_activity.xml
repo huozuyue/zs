@@ -13,7 +13,7 @@
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="match_parent"></com.amap.api.maps.MapView>
-
+        <!-- android:background="@drawable/bg_bottom_bar"-->
         <RelativeLayout
             android:id="@+id/bottom_layout"
             android:layout_width="match_parent"
@@ -29,6 +29,8 @@
                 android:layout_height="35dp"
                 android:layout_marginLeft="12dp"
                 android:hint="起点定位中"
+
+                android:imeActionLabel="aaa"
                 android:singleLine="true"
                 android:textColor="#333333"
                 android:textSize="16sp" />
@@ -39,6 +41,7 @@
                 android:layout_height="35dp"
                 android:layout_below="@+id/city"
                 android:layout_marginLeft="12dp"
+                android:background="@drawable/bg_bottom_bar"
                 android:hint="终点"
                 android:singleLine="true"
                 android:textColor="#333333"
@@ -57,6 +60,7 @@
                 android:id="@+id/firstline"
                 android:layout_width="wrap_content"
                 android:layout_height="35dp"
+
                 android:layout_below="@+id/searchButton"
                 android:layout_marginLeft="12dp"
                 android:singleLine="true"
@@ -67,6 +71,7 @@
                 android:id="@+id/secondline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:layout_below="@+id/firstline"
                 android:layout_marginLeft="12dp"
                 android:gravity="right"
