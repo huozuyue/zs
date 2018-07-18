@@ -39,9 +39,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_email"
-                    android:inputType="textEmailAddress"
+                    android:inputType="phone"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+
+                    android:text="18931121207" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -59,7 +61,8 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text="12345678" />
 
             </android.support.design.widget.TextInputLayout>
 

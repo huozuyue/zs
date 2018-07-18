@@ -23,6 +23,7 @@ public class Main2Activity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +58,11 @@ public class Main2Activity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main2, menu);
+        //android.support.design.widget.AppBarLayout
+        //ScrollingViewBehavior类中的layoutDependsOn() 代表寻找被观察View onDependentViewChanged()
+        // 被观察View变化的时候回调用的方法
+
+        //
         return true;
     }
 
@@ -95,7 +101,7 @@ public class Main2Activity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);//侧滑菜单
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

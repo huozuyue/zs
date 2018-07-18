@@ -1,4 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    你的Behavior类名
+android.support.design.widget.AppBarLayout$ScrollingViewBehavior
+ScrollingViewBehavior是AppBarLayout的静态内部类
+tools:context="com.example.hzy.lovenum.Main2Activity" 相当于注释 不会被编译
+tools:showIn="@layout/app_bar_main2"> 提示被哪个文件所引用
+
+    -->
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"

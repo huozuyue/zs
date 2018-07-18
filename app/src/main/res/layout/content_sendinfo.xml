@@ -1,77 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.hzy.lovenum.SendinfoActivity"
+    tools:layout_editor_absoluteY="81dp"
     tools:showIn="@layout/sendinfo">
 
-    <EditText
-        android:id="@+id/textView"
-        android:layout_width="200dp"
+    <TextView
+        android:id="@+id/send_locationID"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="92dp"
+
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="7dp"
+        android:layout_marginTop="10dp"
+        android:drawableLeft="@drawable/left_detailstartbig"
+        android:drawableRight="@drawable/arrow_right_blue"
         android:hint="发件人位置"
         android:singleLine="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="19sp" />
 
     <EditText
-        android:id="@+id/editText"
-        android:layout_width="wrap_content"
+        android:id="@+id/detail_send"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="52dp"
-        android:ems="10"
+        android:layout_margin="5dp"
+        android:drawableLeft="@drawable/leftdetailbig"
         android:hint="小区、单元、楼层、门牌号"
-        android:inputType="textLongMessage|textPersonName"
-        app:layout_constraintEnd_toEndOf="@+id/textView"
-        app:layout_constraintHorizontal_bias="0.442"
-        app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        android:singleLine="false" />
+
 
     <EditText
-        android:id="@+id/editText2"
-        android:layout_width="wrap_content"
+        android:id="@+id/name_send"
+        style="@style/Widget.AppCompat.EditText"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="48dp"
-        android:ems="10"
+        android:layout_margin="5dp"
+        android:drawableLeft="@drawable/left_detailnamebig"
+
+
         android:hint="发件人姓名"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="@+id/editText"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/editText"
-        app:layout_constraintTop_toBottomOf="@+id/editText" />
-
+        android:singleLine="false" />
     <EditText
-        android:id="@+id/editText3"
-        android:layout_width="wrap_content"
+        android:id="@+id/tel_send"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="40dp"
-        android:ems="10"
+
+        android:layout_margin="5dp"
+        android:drawableLeft="@drawable/leftdetailtelephonebig"
         android:hint="发件人电话"
         android:inputType="phone"
-        android:singleLine="false"
-        app:layout_constraintEnd_toEndOf="@+id/editText2"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/editText2"
-        app:layout_constraintTop_toBottomOf="@+id/editText2" />
+        android:singleLine="false" />
+
+    <EditText
+        android:id="@+id/remarks_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:drawableLeft="@drawable/lefmessageicon"
+        android:hint="备注：物品 、重量、特别说明"
+        android:singleLine="false" />
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="36dp"
+
+        android:layout_margin="10dp"
+
+        android:background="@android:color/holo_blue_bright"
         android:text="确定"
-        app:layout_constraintEnd_toEndOf="@+id/editText3"
-        app:layout_constraintHorizontal_bias="0.513"
-        app:layout_constraintStart_toStartOf="@+id/editText3"
-        app:layout_constraintTop_toBottomOf="@+id/editText3" />
-</android.support.constraint.ConstraintLayout>
+        android:textColor="@color/black" />
+
+
+</LinearLayout>

@@ -333,8 +333,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             String successStatus="successStatus";
             String tokenString="token";
             //
-            //loginflag =usi.login(mEmail,mPassword);
-            loginflag ="{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJhIiwiaWF0IjoxNTE5ODE0NDgwMTczLCJleHQiOjE1MTk4MTgwODAxNzN9.SRyrOIA7d-AF-4Hvx3Zdm52r_8hwG_y8sXoZp_rG84k\",\"msg\":\"2\",\"success\":\"2\"}";
+
+            loginflag = usi.login(mEmail, mPassword, getBaseContext());
+            //loginflag
+            // ="{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJhIiwiaWF0IjoxNTE5ODE0NDgwMTczLCJleHQiOjE1MTk4MTgwODAxNzN9.SRyrOIA7d-AF-4Hvx3Zdm52r_8hwG_y8sXoZp_rG84k\",\"msg\":\"2\",\"success\":\"2\"}";
             //loginflag转化为jason对象
             try {
                 JSONObject dataJson = new JSONObject(loginflag);
@@ -400,7 +402,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //intent.setClass(LoginActivity.this, PoiKeywordSearchActivity.class);
                 //intent.setClass(LoginActivity.this, CustomLocationActivity.class);
                 //intent.setClass(LoginActivity.this, CustomLocationModeActivity.class);
-                intent.setClass(LoginActivity.this, OrderLocationModeActivity.class);
+                intent.setClass(LoginActivity.this, mainActivity.class);
+                //intent.setClass(LoginActivity.this, myOrde.class);
                 startActivity(intent);
                 finish();
             } else if (flag==0){

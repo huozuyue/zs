@@ -44,9 +44,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.NoActionBar">
         <activity
-            android:name=".Main2Activity"
+            android:name=".mainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -92,6 +92,10 @@
             android:label="@string/locationmodesource_demo"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".LoginActivity"
+            android:label="@string/locationmodesource_demo"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".OrderActivity"
             android:label="@string/locationmodesource_demo"
             android:screenOrientation="portrait" />
@@ -122,10 +126,50 @@
             android:name=".receiveinfo"
             android:label="@string/title_activity_receiveinfo"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
+
+        <!--
+            <activity
             android:name=".Main2Activity"
             android:label="@string/title_activity_main2"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        -->
+        <activity
+            android:name=".ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" />
+        <activity
+            android:name=".ItemListActivity"
+            android:label="@string/title_item_list"
+            android:parentActivityName=".mainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.hzy.lovenum.mainActivity" />
+        </activity>
+        <activity
+            android:name=".ItemDetailActivity"
+            android:label="@string/title_item_detail"
+            android:parentActivityName=".ItemListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.hzy.lovenum.ItemListActivity" />
+        </activity>
+        <activity
+            android:name=".myOrde"
+            android:label="@string/title_item_detail" />
+        <activity
+            android:name=".OrderDetail"
+            android:label="@string/title_activity_order_detail"
+            android:parentActivityName=".myOrde"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.hzy.lovenum.myOrde" />
+        </activity>
     </application>
 
 </manifest>

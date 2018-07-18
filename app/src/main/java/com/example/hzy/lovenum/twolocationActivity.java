@@ -2,11 +2,9 @@ package com.example.hzy.lovenum;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.MatrixCursor;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -24,7 +22,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -66,21 +63,32 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         AMapLocationListener, AMap.OnMapTouchListener, View.OnClickListener, TextWatcher,
         Inputtips.InputtipsListener, AMap.OnMarkerClickListener, AMap.InfoWindowAdapter, PoiSearch.OnPoiSearchListener,
         AdapterView.OnItemClickListener,SearchView.OnSuggestionListener {
-    private String keyWord = "";// 要输入的poi搜索关键字
-    private ProgressDialog progDialog = null;// 搜索时进度条
     int nowsecond=0;
     int lastsecond=0;
     Calendar c=Calendar.getInstance();
+    Marker marker;
+    //自定义定位小蓝点的Marker
+    List<String> listString1 = new ArrayList<String>();
+    List<LatLonPoint> listlatLng = new ArrayList<LatLonPoint>();
+    boolean useMoveToLocationWithMapMode = true;
+    //自定义定位小蓝点的Marker
+    Marker locationMarker;
+    //MatrixCursor cursor;//搜索提示
+    //坐标和经纬度转换工具
+    Projection projection;
+    String strContentString = "";
+    SearchViewDemo svd;
+    SearchViewDemo.MyHandler handler1;
+    SearchViewDemo.SearchTipThread stt;
+    MyCancelCallback myCancelCallback = new MyCancelCallback();
+    private String keyWord = "";// 要输入的poi搜索关键字
+    private ProgressDialog progDialog = null;// 搜索时进度条
     private PoiResult poiResult; // poi返回的结果 POI（Point Of Interest，兴趣点）搜索结果分页显示
     private int currentPage = 0;// 当前页面，从0开始计数
     private PoiSearch.Query query;// Poi查询条件类 此类定义了搜索的关键字，类别及城市。
     private PoiSearch poiSearch;// POI搜索 POI（Point Of Interest，兴趣点）搜索
     private MarkerOptions markerOption; //标记点的配置
     private LatLng latLng = new LatLng(87.593784,43.851112);//存储经纬度坐标值
-    Marker marker;
-    //自定义定位小蓝点的Marker
-    List<String> listString1 = new ArrayList<String>();
-    List<LatLonPoint> listlatLng = new ArrayList<LatLonPoint>();
     private AMap aMap;
     private MapView mapView;
     private LocationSource.OnLocationChangedListener mListener;
@@ -90,17 +98,8 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
     private AutoCompleteTextView textView2;
     private ListView lv_poiresult;
     private EditText editCity;// 要输入的城市名字或者城市区号
-    boolean useMoveToLocationWithMapMode = true;
     private String locationaddress;
-    //自定义定位小蓝点的Marker
-    Marker locationMarker;
-    //MatrixCursor cursor;//搜索提示
-    //坐标和经纬度转换工具
-    Projection projection;
-    String strContentString="";
-    SearchViewDemo svd;
-    SearchViewDemo.MyHandler handler1;
-    SearchViewDemo.SearchTipThread stt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,6 +132,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         setSupportActionBar(toolbar);
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search_view, menu);
@@ -156,7 +156,8 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(twolocationActivity.this, "begin search", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(twolocationActivity.this, "begin search", Toast.LENGTH_SHORT)
+                // .show();
                 //开始搜索
                 //keyWord = AMapUtil.checkEditText(searchText);// 取关键字
                 /*if ("".equals(keyWord)) {
@@ -237,7 +238,6 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         return super.onCreateOptionsMenu(menu);
     }
 
-
     /**
      * 初始化
      */
@@ -273,7 +273,6 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         aMap.setOnMarkerClickListener(this);// 添加点击marker监听事件
         aMap.setInfoWindowAdapter(this);// 添加显示infowindow监听事件
     }
-
 
     /**
      * 方法必须重写
@@ -365,7 +364,6 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         }
     }
 
-
     /**
      * 修改自定义定位小蓝点的位置
      * @param latLng
@@ -405,8 +403,6 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
 
     }
 
-
-         MyCancelCallback myCancelCallback = new MyCancelCallback();
     @Override
     public void onTouch(MotionEvent motionEvent) {
         Log.i("amap","onTouch 关闭地图和小蓝点一起移动的模式");
@@ -425,11 +421,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
              */
             case R.id.searchButton:
 
-                //(当前Activity，目标Activity)
-                // intent.setClass(LoginActivity.this, Activityname1.class);
-                //intent.setClass(LoginActivity.this, PoiKeywordSearchActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationModeActivity.class);
+
                 if("sendlocation".equals(strContentString)) {
                 intent.setClass(this, SendinfoActivity.class);
                     intent.putExtra("location", keyWord);
@@ -452,12 +444,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
                 //nextButton();
                 break;
             case R.id.city:
-              //  Intent intent = new Intent();
-                //(当前Activity，目标Activity)
-                // intent.setClass(LoginActivity.this, Activityname1.class);
-                //intent.setClass(LoginActivity.this, PoiKeywordSearchActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationModeActivity.class);
+
                 intent.setClass(this, SendinfoActivity.class);
                 intent.putExtra("location", locationaddress);
                 Logger.d("locationaddress*******************"+locationaddress);
@@ -488,9 +475,9 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             InputtipsQuery inputquery = new InputtipsQuery(newText, "乌鲁木齐");
             //InputtipsQuery inputquery = new InputtipsQuery(newText, editCity.getText().toString
             // ());
-            Inputtips inputTips = new Inputtips(this, inputquery);
-            inputTips.setInputtipsListener(this);
-            inputTips.requestInputtipsAsyn();
+            //Inputtips inputTips = new Inputtips(this, inputquery);
+            //inputTips.setInputtipsListener(this);
+            // inputTips.requestInputtipsAsyn();
         }
     }
     /**
@@ -503,7 +490,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         query = new PoiSearch.Query(keyWord, "", "乌鲁木齐");
         //query = new PoiSearch.Query(keyWord, "", editCity.getText().toString());//
         // 第一个参数表示搜索字符串，第二个参数表示poi搜索类型，第三个参数表示poi搜索区域（空字符串代表全国）
-        query.setPageSize(10);// 设置每页最多返回多少条poiitem
+        query.setPageSize(20);// 设置每页最多返回多少条poiitem
         query.setPageNum(currentPage);// 设置查第一页
 
         poiSearch = new PoiSearch(this, query);
@@ -533,14 +520,14 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
     public void onGetInputtips(List<Tip> tipList, int rCode) {
         if (rCode == AMapException.CODE_AMAP_SUCCESS) {// 正确返回
            // List<String> listString = new ArrayList<String>();
-            MatrixCursor cursor = new MatrixCursor(new String[] { "_id","name" });
+            // MatrixCursor cursor = new MatrixCursor(new String[] { "_id","name" });
             //String[] listString=null;
-            for (int i = 0; i < tipList.size(); i++) {
+            //for (int i = 0; i < tipList.size(); i++) {
                //listString.add(tipList.get(i).getName());
                 //listString[i]=tipList.get(i).getName();
                 //Logger.d("tipList.get(i).getName()****"+i +"###"+ tipList.get(i).getName());
-                cursor.addRow(new Object[] {i, tipList.get(i).getName() });
-            }
+            //cursor.addRow(new Object[] {i, tipList.get(i).getName() });
+            // }
             /*ArrayAdapter<String> aAdapter = new CursorAdapter(
                     getApplicationContext(),
                     R.layout.route_inputs, listString);*/
@@ -551,7 +538,8 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             //String[] tableCursor = new String[] { "_id" };
 
 
-            SearchView.SearchAutoComplete textView = ( SearchView.SearchAutoComplete) searchView.findViewById(R.id.search_src_text);
+            // SearchView.SearchAutoComplete textView = ( SearchView.SearchAutoComplete)
+            // searchView.findViewById(R.id.search_src_text);
 
            // textView.setAdapter(aAdapter);
             //获取到TextView的ID
@@ -566,9 +554,11 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             //Cursor cursor = TextUtils.isEmpty(newText) ? null : queryData(newText);
             // 不要频繁创建适配器，如果适配器已经存在，则只需要更新适配器中的cursor对象即可。
             if (searchView.getSuggestionsAdapter() == null) {
-                searchView.setSuggestionsAdapter(new SimpleCursorAdapter(twolocationActivity.this, R.layout.route_inputs, cursor, new String[]{"name"}, new int[]{R.id.online_user_list_item_textview}));
+                // searchView.setSuggestionsAdapter(new SimpleCursorAdapter(twolocationActivity
+                // .this, R.layout.route_inputs, cursor, new String[]{"name"}, new int[]{R.id
+                // .online_user_list_item_textview}));
             } else {
-                searchView.getSuggestionsAdapter().changeCursor(cursor);
+                // searchView.getSuggestionsAdapter().changeCursor(cursor);
             }
 
              //  searchText.setSuggestionsAdapter(aAdapter);
@@ -639,33 +629,6 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
     }
 
     /**
-     * 监控地图动画移动情况，如果结束或者被打断，都需要执行响应的操作
-     */
-    class MyCancelCallback implements AMap.CancelableCallback {
-
-        LatLng targetLatlng;
-        public void setTargetLatlng(LatLng latlng) {
-            this.targetLatlng = latlng;
-        }
-
-        @Override
-        public void onFinish() {
-            if(locationMarker != null && targetLatlng != null) {
-                locationMarker.setPosition(targetLatlng);
-            }
-        }
-
-        @Override
-        public void onCancel() {
-            if(locationMarker != null && targetLatlng != null) {
-                locationMarker.setPosition(targetLatlng);
-            }
-        }
-    };
-
-
-
-    /**
      * 激活定位
      */
     @Override
@@ -677,9 +640,10 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             //设置定位监听
             mlocationClient.setLocationListener(this);
             //设置为高精度定位模式
-            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode
+                    .Hight_Accuracy);
             //是指定位间隔
-            mLocationOption.setInterval(200000);
+            mLocationOption.setInterval(20000000);
             //设置定位参数
             mlocationClient.setLocationOption(mLocationOption);
             // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
@@ -689,6 +653,8 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             mlocationClient.startLocation();
         }
     }
+
+    ;
 
     /**
      * 停止定位
@@ -720,15 +686,32 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
                     listString1.clear();
                     listlatLng.clear();
                     for (int i = 0; i < poiResult.getPois().size(); i++) {
-                        listString1.add(poiResult.getPois().get(i).toString());
+                        listString1.add(poiResult.getPois().get(i).toString() + "\r\n" +
+                                poiResult.getPois().get(i).getAdName() + poiResult.getPois().get(i).getSnippet());
                         //listlatLng
                         listlatLng.add( poiResult.getPois().get(i).getLatLonPoint());
-                       // Logger.d(i +"###"+ poiResult.getPois().get(i).getLatLonPoint());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getLatLonPoint());
+                        Logger.d(i + "getSnippet##古牧地镇振兴北路花都景盛苑商#" + poiResult.getPois().get(i)
+                                .getSnippet());
+                        Logger.d(i + "getDirection###" + poiResult.getPois().get(i).getDirection());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getBusinessArea());
+                        Logger.d(i + "###米东区" + poiResult.getPois().get(i).getAdName());
+                        Logger.d(i + "###乌鲁木齐市" + poiResult.getPois().get(i).getCityName());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getParkingType());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getPoiExtension()
+                                .toString());
+                        Logger.d(i + "getTel###" + poiResult.getPois().get(i).getTel());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getEmail());
+                        Logger.d(i + "###" + poiResult.getPois().get(i).getTypeDes());
                     }
+
                     ArrayAdapter<String> aAdapter1 = new ArrayAdapter<String>(
                             getApplicationContext(),
-                            android.R.layout.simple_list_item_1, listString1);
+                            R.layout.simple_list_item_1, listString1);
                     lv_poiresult.setAdapter(aAdapter1);
+
+                    lv_poiresult.setBackground(getResources().getDrawable(R.drawable.bg_bottom_bar));
+                    //lv_poiresult.setlayou
                     lv_poiresult.setVisibility(View.VISIBLE);
                     lv_poiresult.setOnItemClickListener(this);
                     //aAdapter1.notifyDataSetChanged();
@@ -742,7 +725,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
 
                     } else if (suggestionCities != null
                             && suggestionCities.size() > 0) {
-                        showSuggestCity(suggestionCities);
+                        //showSuggestCity(suggestionCities);
                     } else {
                         ToastUtil.show(this,
                                 R.string.no_result);
@@ -776,6 +759,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
                 .draggable(true);//设置Marker覆盖物是否可拖拽。
         marker = aMap.addMarker(markerOption);
     }
+
     /**
      * 隐藏进度框
      */
@@ -784,6 +768,7 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
             progDialog.dismiss();
         }
     }
+
     /**
      * poi没有搜索到数据，返回一些推荐城市的信息
      */
@@ -796,5 +781,31 @@ public class twolocationActivity extends AppCompatActivity implements LocationSo
         }
         ToastUtil.show(this, infomation);
 
+    }
+
+    /**
+     * 监控地图动画移动情况，如果结束或者被打断，都需要执行响应的操作
+     */
+    class MyCancelCallback implements AMap.CancelableCallback {
+
+        LatLng targetLatlng;
+
+        public void setTargetLatlng(LatLng latlng) {
+            this.targetLatlng = latlng;
+        }
+
+        @Override
+        public void onFinish() {
+            if (locationMarker != null && targetLatlng != null) {
+                locationMarker.setPosition(targetLatlng);
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            if (locationMarker != null && targetLatlng != null) {
+                locationMarker.setPosition(targetLatlng);
+            }
+        }
     }
 }

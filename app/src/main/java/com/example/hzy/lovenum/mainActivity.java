@@ -5,14 +5,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +56,8 @@ import com.amap.api.services.route.WalkRouteResult;
 import com.dingwei.util.AMapUtil;
 import com.dingwei.util.ToastUtil;
 import com.hzy.serviceimpl.SharedPreferencesHelper;
+import com.hzy.util.RetrofitUtil;
+import com.hzy.util.checkPemission;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
@@ -69,7 +80,8 @@ import overlay.DrivingRouteOverlay;
 public class mainActivity extends AppCompatActivity implements LocationSource,
 		AMapLocationListener, AMap.OnMapTouchListener, View.OnClickListener, TextWatcher,
         Inputtips.InputtipsListener, AMap.OnMarkerClickListener, AMap.InfoWindowAdapter,
-        RouteSearch.OnRouteSearchListener,OnMapClickListener,OnInfoWindowClickListener {
+        RouteSearch.OnRouteSearchListener, OnMapClickListener, OnInfoWindowClickListener
+        , NavigationView.OnNavigationItemSelectedListener {
     private final int ROUTE_TYPE_DRIVE = 2;
     Button searButton;
 	boolean useMoveToLocationWithMapMode = true;
@@ -85,6 +97,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
     double receivelat=0.0;
     double receivelon=0.0;
     MyCancelCallback myCancelCallback = new MyCancelCallback();
+    private ProgressDialog progDialog = null;// 提交订单时进度条
     private AMap aMap;
     private MapView mapView;
     private OnLocationChangedListener mListener;
@@ -100,7 +113,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
     private LatLonPoint mStartPoint = new LatLonPoint(39.942295, 116.335891);//起点，39.942295,
     // 116.335891
     private LatLonPoint mEndPoint = new LatLonPoint(39.995576, 116.481288);//终点，39.995576,116.481288
-    private ProgressDialog progDialog = null;// 搜索时进度条
+
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -133,16 +146,42 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 		textView.setText("自定义效果\n" +
 				" 1、定位成功后， 小蓝点和和地图一起移动到定位点\n" +
 				" 2、手势操作地图后模式修改为 仅定位不移动到中心点");
-		//layout.addView(textView);
 
-		//setContentView(layout);
-		setContentView(R.layout.main_activity);
-		mapView = (MapView) findViewById(R.id.map);//找到地图控件
-		mapView.onCreate(savedInstanceState);// 此方法必须重写
+        setContentView(R.layout.activity_main2);
+        mapView = (MapView) findViewById(R.id.map);//找到地图控件
+        mapView.onCreate(savedInstanceState);// 此方法必须重写
+        //检测系统是否打开开启了地理定位权限
+
 		init();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setOnClickListener(this);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+                RetrofitUtil.beginRequest(mainActivity.this, mainActivity.this);
+
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string
+                .navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+
         if(null!=editCity.getText()&&!"".equals(editCity.getText())&&null!=searchText.getText()&&!"".equals(searchText.getText())){
             searButton.performClick();
         }
+
 	}
 
 	/**
@@ -224,9 +263,10 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 	 * 设置一些amap的属性
 	 */
 	private void setUpMap() {
-		aMap.setLocationSource(this);// 设置定位监听
-		aMap.getUiSettings().setMyLocationButtonEnabled(true);// 设置默认定位按钮是否显示
-		aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
+        checkPemission.checkPemissionGrant(this, mainActivity.this);
+        aMap.setLocationSource(this);// 设置定位监听
+        aMap.getUiSettings().setMyLocationButtonEnabled(true);// 设置默认定位按钮是否显示
+        aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
 
 		aMap.setOnMapTouchListener(this);
 
@@ -247,7 +287,10 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         editCity.setText(strContentString);
         aMap.setOnMarkerClickListener(this);// 添加点击marker监听事件
         aMap.setInfoWindowAdapter(this);// 添加显示infowindow监听事件
-	}
+        //LinearLayout ll=getLayoutInflater().inflate(R.id.nav_header_main2,null);
+        //ImageView iv= (ImageView)findViewById(R.id.imageView);
+        //iv.setImageResource(R.drawable.login_iv1);
+    }
 
 	/**
 	 * 方法必须重写
@@ -415,6 +458,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
      */
     @Override
     public void onClick(View v) {
+
         Intent intent = new Intent();
         switch (v.getId()) {
             /**
@@ -461,12 +505,6 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
                 //nextButton();
                 break;
             case R.id.city:
-                //Intent intent = new Intent();
-                //(当前Activity，目标Activity)
-                // intent.setClass(LoginActivity.this, Activityname1.class);
-                //intent.setClass(LoginActivity.this, PoiKeywordSearchActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationModeActivity.class);
                 intent.setClass(this, SendinfoActivity.class);
 				intent.putExtra("location", locationaddress);
                 Logger.d("locationaddress*******************"+locationaddress);
@@ -474,17 +512,28 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
                 //finish();
                 break;
             case R.id.keyWord:
-                //Intent intent = new Intent();
-                //(当前Activity，目标Activity)
-                // intent.setClass(LoginActivity.this, Activityname1.class);
-                //intent.setClass(LoginActivity.this, PoiKeywordSearchActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationActivity.class);
-                //intent.setClass(LoginActivity.this, CustomLocationModeActivity.class);
-                intent.setClass(this, twolocationActivity.class);
-                intent.putExtra("location", "receivelocation");
+
+                intent.setClass(this, receiveinfo.class);
+                intent.putExtra("location", receivelocation);
                 Logger.d("locationaddress*******************"+locationaddress);
                 startActivity(intent);
                 //finish();
+                break;
+            case R.id.imageView:
+                if ("".equals(SharedPreferencesHelper.getInstance(mainActivity.this)
+                        .getStringValue("token"))) {
+                    intent.setClass(this, LoginActivity.class);
+                    //intent.putExtra("location", "receivelocation");
+                    Logger.d("跳转到登录界面");
+                } else {
+                    //intent.setClass(this, ScrollingActivity.class);
+                    intent.setClass(this, ScrollingActivity.class);
+                    //intent.putExtra("location", "receivelocation");
+                    Logger.d("跳转到个人信息界面");
+
+                }
+                startActivity(intent);
+
                 break;
             default:
                 break;
@@ -511,7 +560,7 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
         if (mEndPoint == null) {
             ToastUtil.show(this, "终点未设置");
         }
-        showProgressDialog();
+        showProgressDialog(0);
         final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(
                 mStartPoint, mEndPoint);
         if (routeType == ROUTE_TYPE_DRIVE) {// 驾车路径规划
@@ -548,11 +597,20 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
                     mBottomLayout.setVisibility(View.VISIBLE);
                     int dis = (int) drivePath.getDistance();
                     int dur = (int) drivePath.getDuration()*3;
-                    String des = AMapUtil.getFriendlyTime(dur)+"内送达("+AMapUtil.getFriendlyLength(dis)+")";
+                    SharedPreferencesHelper.getInstance(mainActivity.this).putIntValue("dis", dis);
+                    SharedPreferencesHelper.getInstance(mainActivity.this).putIntValue("dur", dur);
 
+                    String des = AMapUtil.getFriendlyTime(dur) + "内送达(" + AMapUtil.getFriendlyLength
+                            (dis) + ")";
+                    //SharedPreferencesHelper.getInstance(mainActivity.this).putStringValue
+                    // ("Time_mileage",des);
                     mRotueTimeDes.setText(des);
                     mRouteDetailDes.setVisibility(View.VISIBLE);
-                    int taxiCost = (int) mDriveRouteResult.getTaxiCost();
+                    Logger.d("金额共计" + (int) mDriveRouteResult.getTaxiCost() + "元");
+                    int taxiCost = 0;
+                    taxiCost = Math.round((int) mDriveRouteResult.getTaxiCost() * 1.8f);
+                    taxiCost = (taxiCost == 0) ? taxiCost = Math.round(dis / 1000 * 3) : taxiCost;
+                    SharedPreferencesHelper.getInstance(mainActivity.this).putIntValue("taxiCost", taxiCost);
                    mRouteDetailDes.setText("金额共计"+taxiCost+"元");
                     //ToastUtil.show(this, des+"约"+taxiCost+"元");
                    /* mBottomLayout.setOnClickListener(new View.OnClickListener() {
@@ -594,20 +652,25 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
     /**
      * 显示进度框
      */
-    private void showProgressDialog() {
+    public void showProgressDialog(int a) {
 
         if (progDialog == null)
             progDialog = new ProgressDialog(this);
         progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progDialog.setIndeterminate(false);
         progDialog.setCancelable(false);
-        progDialog.setMessage("正在搜索:\n" );
+        if (a == 0) {
+            progDialog.setMessage("正在生成订单！");
+        } else {
+            progDialog.setMessage("正在提交订单！");
+        }
+
         progDialog.show();
     }
     /**
      * 隐藏进度框
      */
-    private void dissmissProgressDialog() {
+    public void dissmissProgressDialog() {
         if (progDialog != null) {
             progDialog.dismiss();
         }
@@ -631,9 +694,9 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
             InputtipsQuery inputquery = new InputtipsQuery(newText, "乌鲁木齐");
             //InputtipsQuery inputquery = new InputtipsQuery(newText, editCity.getText().toString
             // ());
-            Inputtips inputTips = new Inputtips(this, inputquery);
-            inputTips.setInputtipsListener(this);
-            inputTips.requestInputtipsAsyn();
+            // Inputtips inputTips = new Inputtips(this, inputquery);
+            //  inputTips.setInputtipsListener(this);
+            //  inputTips.requestInputtipsAsyn();
         }
     }
 
@@ -726,6 +789,79 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
 		mlocationClient = null;
 	}
 
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main2, menu);
+        ImageView iv = (ImageView) findViewById(R.id.imageView);
+        if ("".equals(SharedPreferencesHelper.getInstance(mainActivity.this).getStringValue
+                ("token"))) {
+
+            iv.setImageResource(R.drawable.login_iv1);
+        }
+        iv.setOnClickListener(this);
+        //getMenuInflater().inflate();
+        //android.support.design.widget.AppBarLayout
+        //ScrollingViewBehavior类中的layoutDependsOn() 代表寻找被观察View onDependentViewChanged()
+        // 被观察View变化的时候回调用的方法
+
+        //
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            Intent intent = new Intent();
+            intent.setClass(this, myOrde.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);//侧滑菜单
+        drawer.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
     /**
      * 监控地图动画移动情况，如果结束或者被打断，都需要执行响应的操作
      */
@@ -751,6 +887,5 @@ public class mainActivity extends AppCompatActivity implements LocationSource,
             }
         }
     }
-
 
 }

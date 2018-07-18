@@ -1,9 +1,13 @@
 package com.hzy.serviceimpl;
 
+import android.content.Context;
+
+import com.hzy.util.AppProperties;
 import com.sun.jersey.api.client.Client;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
 import javax.ws.rs.core.MediaType;
 
@@ -12,7 +16,7 @@ import javax.ws.rs.core.MediaType;
  */
 
 public class UserServiceImpl {
-    public String login(String username, String password) {
+    public String login(String username, String password, Context context) {
         // System.out.println("****************************");
         // udi.add();
         // System.out.println("****************************");
@@ -25,17 +29,18 @@ public class UserServiceImpl {
          System.out.println("加密后的密码为："+password);
 
         System.out.println("开始测试");
-        String url= "http://172.25.220.8:8080/arest/services/test/handleTest";
+        //String url= "http://192.168.43.121:8080/arest/services/test/handleTest";
         //String url = "http://172.28.234.9:8080/arest/services/test/handleTest";
-        // String url = "http://192.168.1.3:8080/arest/services/test/handleTest";
+        //String url = "http://192.168.1.4:8080/arest/services/test/handleTest";
         // String url = "http://49.52.18.101:8080/arest/services/test/aaa?params="+;
+        Properties properties = AppProperties.getProperties(context);
+        //url = properties.getProperty("serverUrl");
+        // Client client=Client.create();
 
-        Client client=Client.create();
 
-
-
-
-        String responce=Client.create().resource(url).type(MediaType.APPLICATION_JSON).post(String.class,username+":"+password);
+        String responce = Client.create().resource(properties.getProperty("serverUrl") +
+                "handleTest").type(MediaType.APPLICATION_JSON).post(String.class, username + ":"
+                + password);
         System.out.println("client返回值"+responce);
 
         if (null == responce) {

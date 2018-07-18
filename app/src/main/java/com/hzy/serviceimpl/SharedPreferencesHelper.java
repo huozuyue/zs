@@ -29,6 +29,7 @@ public  class SharedPreferencesHelper  {
         return instance;
     }
 
+
     /**
      * 判断activity是否引导�?	 *
      *
